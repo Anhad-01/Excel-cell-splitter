@@ -62,8 +62,9 @@ else:
                 file_handle.write(uploaded_file.getbuffer())
 
             try:
-                slide_previews = render_html_slides(input_path)
-                save_slide_images_as_pdf(slide_previews, output_path)
+                with st.spinner("Preparing browser and converting HTML to PDF..."):
+                    slide_previews = render_html_slides(input_path)
+                    save_slide_images_as_pdf(slide_previews, output_path)
 
                 st.subheader("Preview")
                 for index, slide_preview in enumerate(slide_previews, start=1):

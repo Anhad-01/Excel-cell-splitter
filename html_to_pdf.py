@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -11,6 +13,37 @@ HEIGHT = 2160
 SCALE = 2
 
 
+def ensure_chromium_installed() -> None:
+    install_command = [sys.executable, "-m", "playwright", "install", "chromium"]
+    result = subprocess.run(
+        install_command,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        error_output = (result.stderr or result.stdout).strip()
+        raise RuntimeError(
+            "Playwright Chromium installation failed. "
+            f"Installer output: {error_output or 'No output returned.'}"
+        )
+
+
+def launch_browser(playwright):
+    try:
+        return playwright.chromium.launch(
+            args=["--no-sandbox", "--disable-setuid-sandbox"]
+        )
+    except Exception as error:
+        if "Executable doesn't exist" not in str(error):
+            raise
+
+        ensure_chromium_installed()
+        return playwright.chromium.launch(
+            args=["--no-sandbox", "--disable-setuid-sandbox"]
+        )
+
+
 def render_html_slides(input_path: str) -> list[bytes]:
     html_path = Path(input_path).resolve()
 
@@ -18,9 +51,7 @@ def render_html_slides(input_path: str) -> list[bytes]:
         image_paths: list[Path] = []
 
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(
-                args=["--no-sandbox", "--disable-setuid-sandbox"]
-            )
+            browser = launch_browser(playwright)
 
             try:
                 context = browser.new_context(

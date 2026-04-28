@@ -20,6 +20,7 @@ A Streamlit app with two processing flows:
 - Looks for `.slide` elements in the HTML
 - Captures the `.frame` element for each slide
 - Combines the captured slides into a single PDF for download
+- If Chromium is missing in the runtime environment, the app installs the Playwright browser on first use and then continues the conversion
 
 ## Project files
 
@@ -51,4 +52,4 @@ Then open the local URL shown in your terminal (usually `http://localhost:8501`)
 - For `.xlsx` files, `openpyxl` is used as the Excel engine.
 - If your target split column is not the 4th column, update the `column_index` argument in `process_file(...)` inside `main.py`.
 - The HTML-to-PDF flow expects the uploaded HTML to contain `.slide` elements and a `.frame` element matching the notebook's existing structure.
-- `playwright install chromium` must be run once after installing dependencies so the PDF conversion flow can launch Chromium.
+- The app will attempt to install Playwright Chromium automatically if it is missing, but pre-installing it during setup is still recommended for faster first-run performance in local or hosted environments.
