@@ -29,6 +29,23 @@ def ensure_chromium_installed() -> None:
         )
 
 
+def _format_browser_launch_error(error: Exception) -> RuntimeError:
+    message = str(error)
+
+    if "Executable doesn't exist" in message:
+        return RuntimeError(
+            "Playwright Chromium is not installed. The app will try to install it automatically."
+        )
+
+    if "error while loading shared libraries" in message:
+        return RuntimeError(
+            "The deployment environment is missing Linux libraries required by Playwright Chromium. "
+            "For Streamlit deployment, add the required system packages in `packages.txt` and redeploy."
+        )
+
+    return RuntimeError(f"Failed to launch Playwright Chromium: {message}")
+
+
 def launch_browser(playwright):
     try:
         return playwright.chromium.launch(
@@ -36,12 +53,15 @@ def launch_browser(playwright):
         )
     except Exception as error:
         if "Executable doesn't exist" not in str(error):
-            raise
+            raise _format_browser_launch_error(error)
 
         ensure_chromium_installed()
-        return playwright.chromium.launch(
-            args=["--no-sandbox", "--disable-setuid-sandbox"]
-        )
+        try:
+            return playwright.chromium.launch(
+                args=["--no-sandbox", "--disable-setuid-sandbox"]
+            )
+        except Exception as retry_error:
+            raise _format_browser_launch_error(retry_error) from retry_error
 
 
 def render_html_slides(input_path: str) -> list[bytes]:
