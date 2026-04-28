@@ -42,7 +42,7 @@ playwright install chromium
 
 ## Streamlit deployment
 
-If you deploy this app on Streamlit Community Cloud or another Linux-hosted environment, keep `packages.txt` in the repo so the required Chromium system libraries are installed during the build. The app can install the Playwright browser binary on first run if needed, but missing Linux shared libraries must be present at deploy time.
+If you deploy this app on Streamlit Community Cloud or another Linux-hosted environment, keep `packages.txt` in the repo so the required Chromium system libraries are installed during the build. The package list is intentionally minimal to avoid distro-specific dependency conflicts in hosted images. The app can install the Playwright browser binary on first run if needed, but missing Linux shared libraries must be present at deploy time.
 
 ## Run the app
 
